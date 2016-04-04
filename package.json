@@ -1,0 +1,29 @@
+{
+  "name": "koop-s3fs",
+  "version": "1.0.0",
+  "description": "An AWS S3-backed filesystem plugin for Koop",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard src && npm run compile && tape test/*.js | tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koopjs/koop-s3fs.git"
+  },
+  "keywords": [
+    "koop",
+    "s3",
+    "aws",
+    "fs",
+    "files"
+  ],
+  "author": "Daniel Fenton <dfenton@esri.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/koopjs/koop-s3fs/issues"
+  },
+  "homepage": "https://github.com/koopjs/koop-s3fs#readme",
+  "devDependencies": {
+    "standard": "^6.0.8"
+  }
+}
