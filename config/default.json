@@ -1,0 +1,7 @@
+{
+  "filesystem": {
+    "s3": {
+      "bucket": "koop-dev-bstoltz"
+    }
+  }
+}
