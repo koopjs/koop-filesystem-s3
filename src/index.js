@@ -7,6 +7,30 @@ const request = require('request')
 const zlib = require('zlib')
 
 module.exports = class Filesystem extends S3FS {
+  /*
+S3FS supports the following methods:
+fs.copyDir(sourcePath, destinationPath[, callback])
+fs.copyFile(sourcePath, destinationPath[, callback])
+fs.create(options[, callback]) - create a base level bucket
+fs.delete([callback]) - delete an empty bucket
+fs.destroy([callback]) - delete all files in bucket recursively
+fs.exists(path, callback)
+fs.headObject(path[, callback])
+fs.listContents(path, marker[, callback])
+fs.lstat(path, callback)
+fs.mkdir(path, [mode], callback)
+fs.mkdirp(path[, callback])
+fs.putBucketLifecycle(name, prefix, days[, callback])
+fs.readdir(path, callback)
+fs.readdirp(path[, callback])
+fs.readFile(filename, [options], callback)
+fs.rmdir(path, callback)
+fs.rmdirp(path[, callback])
+fs.stat(path, callback)
+fs.unlink(path, callback)
+fs.writeFile(filename, data, [options], callback)
+*/
+
   constructor () {
     super(config.filesystem.s3.bucket, { endpoint: config.filesystem.s3.endpoint })
     this.type = 'filesystem'
@@ -36,13 +60,13 @@ module.exports = class Filesystem extends S3FS {
     const dir = path.dirname(file)
     const fileName = path.basename(file)
     const params = {
-      Bucket: path.join(this.s3Bucket, dir),
+      Bucket: path.join(this.bucket, dir),
       Key: fileName
     }
     const url = this.s3.getSignedUrl('getObject', params)
     let output = _()
     request(url)
-    .on('error', function (e) { output.emit('error', e) })
+    .on('error', function (e) {  output.emit('error', e) })
     .pipe(gunzip())
     .on('error', function (e) { output.emit('error', e) })
     .pipe(output)
