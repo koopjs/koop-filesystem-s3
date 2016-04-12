@@ -5,16 +5,10 @@ const _ = require('highland')
 const gunzip = require('gunzip-maybe')
 const request = require('request')
 const zlib = require('zlib')
+const Stats = require('s3fs/lib/Stats')
 
-function Filesystem () {
-  this.type = 'filesystem'
-  this.plugin_name = 's3fs'
-  this.dependencies = []
-  this.version = require('./package.json').version
-}
-
-Filesystem.prototype = new S3FS(config.filesystem.s3.bucket, { endpoint: config.filesystem.s3.endpoint })
-/*
+module.exports = class Filesystem extends S3FS {
+  /*
 S3FS supports the following methods:
 fs.copyDir(sourcePath, destinationPath[, callback])
 fs.copyFile(sourcePath, destinationPath[, callback])
@@ -38,52 +32,113 @@ fs.unlink(path, callback)
 fs.writeFile(filename, data, [options], callback)
 */
 
-Filesystem.prototype.createReadStream = function (file) {
-  var dir = path.dirname(file)
-  var fileName = path.basename(file)
-  var params = {
-    Bucket: path.join(this.s3Bucket, dir),
-    Key: fileName
-  }
-  var url = this.s3.getSignedUrl('getObject', params)
-  var output = _()
-  request(url)
-  .on('error', function (e) { output.emit('error', e) })
-  .pipe(gunzip())
-  .on('error', function (e) { output.emit('error', e) })
-  .pipe(output)
+  constructor () {
+    super(config.filesystem.s3.bucket, { endpoint: config.filesystem.s3.endpoint })
+    this.type = 'filesystem'
+    this.plugin_name = 's3fs'
 
-  return output
-}
+    this.bucket = config.filesystem.s3.bucket
+    if (!this.bucket) throw new Error('No S3 Bucket')
 
-Filesystem.prototype.createWriteStream = function (name, options) {
-  let aborted = false
-  const input = _()
-  const params = s3Params(this.s3Bucket, name, options)
-  params.Body = input.pipe(zlib.createGzip())
-
-  const upload = this.s3.upload(params, (err, data) => {
-    if (err && !aborted) input.emit('error', err)
-    else if (!err) input.emit('finish')
-    input.destroy()
-  })
-
-  input.abort = function () {
-    aborted = true
-    upload.abort()
+    this.options = config.filesystem.s3.endpoint
+    this.dependencies = []
+    this.version = require('./package.json').version
   }
 
-  return input
-}
-
-function s3Params (bucket, name, options) {
-  const dir = path.dirname(name)
-  const fileName = path.basename(name)
-  options = options || {}
-  return {
-    Bucket: path.join(bucket, dir),
-    Key: fileName,
-    ACL: 'public-read',
-    Metadata: options.metadata
+  s3Params (bucket, name, options) {
+    const dir = path.dirname(name)
+    const fileName = path.basename(name)
+    options = options || {}
+    return {
+      Bucket: path.join(bucket, dir),
+      Key: fileName,
+      ACL: 'public-read',
+      Metadata: options.Metadata
+    }
   }
+
+  createReadStream (file) {
+    const dir = path.dirname(file)
+    const fileName = path.basename(file)
+    const params = {
+      Bucket: path.join(this.bucket, dir),
+      Key: fileName
+    }
+    const url = this.s3.getSignedUrl('getObject', params)
+    let output = _()
+    request(url)
+    .on('error', function (e) {  output.emit('error', e) })
+    .pipe(gunzip())
+    .on('error', function (e) { output.emit('error', e) })
+    .pipe(output)
+
+    return output
+  }
+
+  createWriteStream (name, options) {
+    let aborted = false
+    const input = _()
+    const through = _()
+    input.on('data', (chunk) => {
+      through.write(chunk)
+    })
+    input.end = (chunk) => {
+      if (chunk) through.write(chunk)
+      through.write(_.nil)
+    }
+    const params = this.s3Params(this.bucket, name, options)
+    params.Body = through.pipe(zlib.createGzip())
+
+    const upload = this.s3.upload(params, (err, data) => {
+      if (err && !aborted) input.emit('error', err)
+      else if (!err) input.emit('finish')
+      input.destroy()
+    })
+
+    input.abort = function () {
+      aborted = true
+      upload.abort()
+    }
+
+    return input
+  }
+
+  stat (file, callback) {
+    const promise = new Promise((resolve, reject) => {
+      this.headObject(file, (err, data) => {
+        if (err) {
+          err.message = err.name
+          return reject(err)
+        }
+        const statObj = new Stats({
+          dev: 0,
+          ino: 0,
+          mode: 0,
+          nlink: 0,
+          uid: 0,
+          gid: 0,
+          rdev: 0,
+          size: Number(data.ContentLength),
+          atim_msec: data.LastModified,
+          mtim_msec: data.LastModified,
+          ctim_msec: data.LastModified,
+          path: path
+        })
+        statObj.acceptRanges = data.AcceptRanges
+        statObj.ETag = data.ETag
+        statObj.ContentType = data.ContentType
+        statObj.Metadata = data.Metadata
+        return resolve(statObj)
+      })
+    })
+    if (!callback) return promise
+
+    promise.then((stats) => {
+      callback(null, stats)
+    }, (reason) => {
+      callback(reason)
+    })
+  }
+
+
 }

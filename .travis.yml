@@ -1,0 +1,12 @@
+
+language: node_js
+
+node_js:
+  - 4
+sudo: false # Enable docker-based containers
+cache:
+  directories: # Cache dependencies
+    - node_modules
+
+script:
+  - npm test
