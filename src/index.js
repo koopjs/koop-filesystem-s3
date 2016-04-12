@@ -5,6 +5,7 @@ const _ = require('highland')
 const gunzip = require('gunzip-maybe')
 const request = require('request')
 const zlib = require('zlib')
+const Stats = require('s3fs/lib/Stats')
 
 module.exports = class Filesystem extends S3FS {
   /*
@@ -52,7 +53,7 @@ fs.writeFile(filename, data, [options], callback)
       Bucket: path.join(bucket, dir),
       Key: fileName,
       ACL: 'public-read',
-      Metadata: options.metadata
+      Metadata: options.Metadata
     }
   }
 
@@ -85,7 +86,7 @@ fs.writeFile(filename, data, [options], callback)
       if (chunk) through.write(chunk)
       through.write(_.nil)
     }
-    const params = this.s3Params(this.bucket, name, this.options)
+    const params = this.s3Params(this.bucket, name, options)
     params.Body = through.pipe(zlib.createGzip())
 
     const upload = this.s3.upload(params, (err, data) => {
@@ -101,5 +102,43 @@ fs.writeFile(filename, data, [options], callback)
 
     return input
   }
-  
+
+  stat (file, callback) {
+    const promise = new Promise((resolve, reject) => {
+      this.headObject(file, (err, data) => {
+        if (err) {
+          err.message = err.name
+          return reject(err)
+        }
+        const statObj = new Stats({
+          dev: 0,
+          ino: 0,
+          mode: 0,
+          nlink: 0,
+          uid: 0,
+          gid: 0,
+          rdev: 0,
+          size: Number(data.ContentLength),
+          atim_msec: data.LastModified,
+          mtim_msec: data.LastModified,
+          ctim_msec: data.LastModified,
+          path: path
+        })
+        statObj.acceptRanges = data.AcceptRanges
+        statObj.ETag = data.ETag
+        statObj.ContentType = data.ContentType
+        statObj.Metadata = data.Metadata
+        return resolve(statObj)
+      })
+    })
+    if (!callback) return promise
+
+    promise.then((stats) => {
+      callback(null, stats)
+    }, (reason) => {
+      callback(reason)
+    })
+  }
+
+
 }

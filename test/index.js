@@ -29,12 +29,12 @@ test('CreateWrite stream should write gzipped content correctly', t => {
 test('createWriteStream aborts when abort is called', t => {
   const s3fs = new FileSystem()
 
-  const stream = fs.createReadStream('test/fixtures/uploadAbort.txt')
+  const stream = fs.createReadStream('test/fixtures/upload.txt')
     .pipe(s3fs.createWriteStream('uploadAbort.txt'))
 
   setTimeout(stream.abort.bind(stream), 1)
 
-  s3fs.createReadStream('readStream.txt').toArray(arr => {
+  s3fs.createReadStream('uploadAbort.txt').toArray(arr => {
     const txt = arr.toString()
     parseString(txt, (err, result) => {
       t.equal(result.Error.Code[0], 'NoSuchKey',
@@ -42,13 +42,11 @@ test('createWriteStream aborts when abort is called', t => {
       t.end()
     })
   })
-
-
 })
 
 test('createReadStream reads gzipped content', t => {
   const s3fs = new FileSystem()
-  const stream = fs.createReadStream('test/fixtures/readStream.txt')
+  const stream = fs.createReadStream('test/fixtures/upload.txt')
     .pipe(s3fs.createWriteStream('readStream.txt'))
 
   stream.on('finish', () => {
@@ -72,6 +70,24 @@ test('createReadStream reads non gzipped content', t => {
   })
 })
 
+test('Metadata is accessible via read/write streams', t => {
+  const s3fs = new FileSystem()
+  const options = {
+    Metadata: {
+      test: 'this is a test'
+    }
+  }
+  const stream = fs.createReadStream('test/fixtures/upload.txt')
+    .pipe(s3fs.createWriteStream('metadataTest.txt', options))
+  stream.on('finish', () => {
+    s3fs.stat('metadataTest.txt', (err, data) => {
+      t.equal(data.Metadata.test, 'this is a test',
+        'Should be able to read metadata object that has been written')
+      t.end()
+    })
+  })
+})
+
 test.onFinish(() => {
   const s3fs = new FileSystem()
   const params = {
@@ -88,7 +104,6 @@ test.onFinish(() => {
     }
   }
   s3fs.s3.deleteObjects(params, (err, data) => {
-    if (err) console.log(err, err.stack);
-    else console.log(`Removed file ${data}`)
+    console.trace(data)
   })
 })
