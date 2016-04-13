@@ -45,6 +45,22 @@ fs.writeFile(filename, data, [options], callback)
     this.version = require('./package.json').version
   }
 
+  type() {
+    return this.type
+  }
+
+  plugin_name() {
+    return this.plugin_name
+  }
+
+  dependencies() {
+    return this.dependencies
+  }
+
+  version() {
+    return this.version
+  }
+
   s3Params (bucket, name, options) {
     const dir = path.dirname(name)
     const fileName = path.basename(name)
