@@ -9,6 +9,17 @@ const zlib = require('zlib')
 const parseString = require('xml2js').parseString
 const FileSystem = require('../')
 
+test('type and plugin_name are accessible', t => {
+  const s3fs = new FileSystem()
+
+  t.equal(FileSystem.type, 'filesystem', 'type property returns filesystem')
+  t.equal(FileSystem.plugin_name, 's3fs', 'plugin_name property returns s3fs')
+  t.equal(typeof FileSystem.dependencies, typeof [], 'dependencies property returns empty array')
+  t.equal(FileSystem.version, require('../package.json').version, 'version property properly returns package version')
+  
+  t.end()
+})
+
 test('CreateWrite stream should write gzipped content correctly', t => {
   const s3fs = new FileSystem()
   const stream = fs.createReadStream('test/fixtures/upload.txt')
