@@ -7,7 +7,7 @@ const request = require('request')
 const zlib = require('zlib')
 const Stats = require('s3fs/lib/Stats')
 
-module.exports = class Filesystem extends S3FS {
+class Filesystem extends S3FS {
   /*
 S3FS supports the following methods:
 fs.copyDir(sourcePath, destinationPath[, callback])
@@ -34,31 +34,11 @@ fs.writeFile(filename, data, [options], callback)
 
   constructor () {
     super(config.filesystem.s3.bucket, { endpoint: config.filesystem.s3.endpoint })
-    this.type = 'filesystem'
-    this.plugin_name = 's3fs'
 
     this.bucket = config.filesystem.s3.bucket
     if (!this.bucket) throw new Error('No S3 Bucket')
 
     this.options = config.filesystem.s3.endpoint
-    this.dependencies = []
-    this.version = require('./package.json').version
-  }
-
-  type() {
-    return this.type
-  }
-
-  plugin_name() {
-    return this.plugin_name
-  }
-
-  dependencies() {
-    return this.dependencies
-  }
-
-  version() {
-    return this.version
   }
 
   s3Params (bucket, name, options) {
@@ -178,6 +158,10 @@ fs.writeFile(filename, data, [options], callback)
       callback(reason)
     })
   }
-
-
 }
+Filesystem.type = 'filesystem'
+Filesystem.plugin_name = 's3fs'
+Filesystem.dependencies = []
+Filesystem.version = require('./package.json').version
+
+module.exports = Filesystem
