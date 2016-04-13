@@ -99,6 +99,9 @@ test.onFinish(() => {
         },
         {
           Key: 'upload.txt'
+        },
+        {
+          Key: 'metadataTest.txt'
         }
       ]
     }
