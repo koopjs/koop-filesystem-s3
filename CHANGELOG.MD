@@ -6,4 +6,4 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Type, plugin_name, dependencies, version accessible from class object
 
-[1.0.2]: https://github.com/koopjs/koop-worker/compare/v1.0.2..v1.0.1
+[1.0.2]: https://github.com/koopjs/koop-s3fs/compare/v1.0.2..v1.0.1
