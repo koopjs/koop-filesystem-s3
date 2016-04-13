@@ -57,6 +57,13 @@ fs.writeFile(filename, data, [options], callback)
     }
   }
 
+  /**
+   * createReadStream reads file from AWS s3 as highland stream
+   *
+   * @param {string} file - filename
+   * @returns {stream}
+   */
+
   createReadStream (file) {
     const dir = path.dirname(file)
     const fileName = path.basename(file)
@@ -74,6 +81,14 @@ fs.writeFile(filename, data, [options], callback)
 
     return output
   }
+
+  /**
+   * createWriteStream writes to AWS S3 as a Highland stream
+   *
+   * @param {string} name - filename
+   * @param {object} options - optional metadata to attach to file
+   * @returns {stream} stream
+   */
 
   createWriteStream (name, options) {
     let aborted = false
@@ -102,6 +117,14 @@ fs.writeFile(filename, data, [options], callback)
 
     return input
   }
+
+  /**
+   * stat accesses file metadata
+   *
+   * @param {string} file - filename
+   * @param {function} callback
+   * @returns {promise} returns resolved promise
+   */
 
   stat (file, callback) {
     const promise = new Promise((resolve, reject) => {

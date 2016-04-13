@@ -1,7 +1,0 @@
-{
-  "filesystem": {
-    "s3": {
-      "bucket": "test-koop-downloads"
-    }
-  }
-}
