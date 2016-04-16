@@ -94,7 +94,7 @@ test('Metadata is accessible via read/write streams', t => {
 
 test('Resolve a path to a url', t => {
   const url = s3fs.realpathSync('files/1ef_0/full/1ef_0.geojson')
-  t.equal(url, `${config.filesystem.s3.endpoint}/${config.filesystem.s3.bucket}/files/1ef_/full/1ef_0.geojson`)
+  t.equal(url, `${config.filesystem.s3.endpoint}/${config.filesystem.s3.bucket}/files/1ef_0/full/1ef_0.geojson`)
   t.end()
 })
 
