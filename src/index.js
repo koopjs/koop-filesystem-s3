@@ -158,6 +158,18 @@ fs.writeFile(filename, data, [options], callback)
       callback(reason)
     })
   }
+
+  /**
+   * Resolve a relative path to a url
+   *
+   * @param {string} path - a relative path to a file
+   * @return {string} the file's url
+   */
+
+  realpathSync (path) {
+    const endpoint = this.s3.endpoint.href || 'https://s3.amazonaws.com'
+    return `${endpoint}/${this.bucket}/${path}`
+  }
 }
 Filesystem.type = 'filesystem'
 Filesystem.plugin_name = 's3fs'
