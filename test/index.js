@@ -9,19 +9,18 @@ const zlib = require('zlib')
 const parseString = require('xml2js').parseString
 const FileSystem = require('../')
 
-test('type and plugin_name are accessible', t => {
-  const s3fs = new FileSystem()
+const s3fs = new FileSystem()
 
+test('type and plugin_name are accessible', t => {
   t.equal(FileSystem.type, 'filesystem', 'type property returns filesystem')
   t.equal(FileSystem.plugin_name, 's3fs', 'plugin_name property returns s3fs')
   t.equal(typeof FileSystem.dependencies, typeof [], 'dependencies property returns empty array')
   t.equal(FileSystem.version, require('../package.json').version, 'version property properly returns package version')
-  
+
   t.end()
 })
 
 test('CreateWrite stream should write gzipped content correctly', t => {
-  const s3fs = new FileSystem()
   const stream = fs.createReadStream('test/fixtures/upload.txt')
     .pipe(s3fs.createWriteStream('upload.txt'))
 
@@ -38,8 +37,6 @@ test('CreateWrite stream should write gzipped content correctly', t => {
 })
 
 test('createWriteStream aborts when abort is called', t => {
-  const s3fs = new FileSystem()
-
   const stream = fs.createReadStream('test/fixtures/upload.txt')
     .pipe(s3fs.createWriteStream('uploadAbort.txt'))
 
@@ -56,7 +53,6 @@ test('createWriteStream aborts when abort is called', t => {
 })
 
 test('createReadStream reads gzipped content', t => {
-  const s3fs = new FileSystem()
   const stream = fs.createReadStream('test/fixtures/upload.txt')
     .pipe(s3fs.createWriteStream('readStream.txt'))
 
@@ -71,8 +67,6 @@ test('createReadStream reads gzipped content', t => {
 })
 
 test('createReadStream reads non gzipped content', t => {
-  const s3fs = new FileSystem()
-
   s3fs.createReadStream('readStreamNotGzipped.txt').toArray(arr => {
     const txt = arr.toString()
     t.equal(txt, '"Bob is my name"\n',
@@ -82,7 +76,6 @@ test('createReadStream reads non gzipped content', t => {
 })
 
 test('Metadata is accessible via read/write streams', t => {
-  const s3fs = new FileSystem()
   const options = {
     Metadata: {
       test: 'this is a test'
@@ -97,6 +90,12 @@ test('Metadata is accessible via read/write streams', t => {
       t.end()
     })
   })
+})
+
+test('Resolve a path to a url', t => {
+  const url = s3fs.realpathSync('files/1ef_0/full/1ef_0.geojson')
+  t.equal(url, `${config.filesystem.s3.endpoint}/${config.filesystem.s3.bucket}/files/1ef_0/full/1ef_0.geojson`)
+  t.end()
 })
 
 test.onFinish(() => {

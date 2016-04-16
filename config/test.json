@@ -2,7 +2,7 @@
   "filesystem": {
     "s3": {
       "bucket": "test-koop-downloads",
-      "endpoint": "s3-external-1.amazonaws.com"
+      "endpoint": "https://s3-external-1.amazonaws.com"
     }
   }
 }
