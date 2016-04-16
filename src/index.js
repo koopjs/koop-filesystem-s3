@@ -167,8 +167,8 @@ fs.writeFile(filename, data, [options], callback)
    */
 
   realpathSync (path) {
-    const endpoint = this.s3.endpoint.href || 'https://s3.amazonaws.com'
-    return `${endpoint}/${this.bucket}/${path}`
+    const endpoint = this.s3.endpoint.href || 'https://s3.amazonaws.com/'
+    return `${endpoint}${this.bucket}/${path}`
   }
 }
 Filesystem.type = 'filesystem'
