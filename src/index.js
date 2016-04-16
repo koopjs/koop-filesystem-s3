@@ -47,6 +47,7 @@ fs.writeFile(filename, data, [options], callback)
     options = options || {}
     return {
       Bucket: path.join(bucket, dir),
+      ContentEncoding: 'gzip',
       Key: fileName,
       ACL: 'public-read',
       Metadata: options.Metadata

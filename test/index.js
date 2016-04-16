@@ -25,14 +25,14 @@ test('CreateWrite stream should write gzipped content correctly', t => {
     .pipe(s3fs.createWriteStream('upload.txt'))
 
   stream.on('finish', () => {
-    _(request('https://s3.amazonaws.com/test-koop-downloads/upload.txt'))
-      .through(zlib.createGunzip())
-      .toArray(arr => {
-        const txt = arr.join('').toString()
-        t.equal(txt, '"Bob is my name"\n',
-          'Uploaded and downloaded file should be equal')
-        t.end()
-      })
+    request({
+      url: 'https://s3.amazonaws.com/test-koop-downloads/upload.txt',
+      gzip: true
+    }, (e, response, body) => {
+      t.error(e, 'No error getting data')
+      t.equal(body, '"Bob is my name"\n', 'Uploaded and downloaded file should be equal')
+      t.end()
+    })
   })
 })
 
@@ -117,6 +117,6 @@ test.onFinish(() => {
     }
   }
   s3fs.s3.deleteObjects(params, (err, data) => {
-    console.trace(data)
+    if (err) console.trace(err)
   })
 })
