@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* Option to disable automatic gunzipping of `createReadStream` content with `{gunzip: false}`
+
 ## [1.1.1] - 2016-04-27
 ### Changed
 * Stat object includes content encoding
