@@ -1,6 +1,6 @@
 {
   "name": "koop-s3fs",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "An AWS S3-backed filesystem plugin for Koop",
   "main": "index.js",
   "scripts": {
