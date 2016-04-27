@@ -71,7 +71,7 @@ fs.writeFile(filename, data, [options], callback)
     const url = this.s3.getSignedUrl('getObject', params)
     let output = _()
     request(url)
-    .on('error', function (e) {  output.emit('error', e) })
+    .on('error', function (e) { output.emit('error', e) })
     .pipe(gunzip())
     .on('error', function (e) { output.emit('error', e) })
     .pipe(output)
@@ -147,6 +147,7 @@ fs.writeFile(filename, data, [options], callback)
         statObj.acceptRanges = data.AcceptRanges
         statObj.ETag = data.ETag
         statObj.ContentType = data.ContentType
+        statObj.ContentEncoding = data.ContentEncoding
         statObj.Metadata = data.Metadata
         return resolve(statObj)
       })
