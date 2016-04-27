@@ -61,18 +61,20 @@ fs.writeFile(filename, data, [options], callback)
    * @returns {stream}
    */
 
-  createReadStream (file) {
+  createReadStream (file, options) {
+    options = options || {}
     const dir = path.dirname(file)
     const fileName = path.basename(file)
     const params = {
       Bucket: path.join(this.bucket, dir),
       Key: fileName
     }
+    const decompress = (typeof options.gunzip === 'boolean' && !options.gunzip) ? _() : gunzip()
     const url = this.s3.getSignedUrl('getObject', params)
     let output = _()
     request(url)
     .on('error', function (e) { output.emit('error', e) })
-    .pipe(gunzip())
+    .pipe(decompress)
     .on('error', function (e) { output.emit('error', e) })
     .pipe(output)
 

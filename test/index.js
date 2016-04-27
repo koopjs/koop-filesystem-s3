@@ -3,6 +3,7 @@
 const test = require('tape')
 const config = require('config')
 const fs = require('fs')
+const zlib = require('zlib')
 const request = require('request')
 const parseString = require('xml2js').parseString
 const FileSystem = require('../')
@@ -58,8 +59,22 @@ test('createReadStream reads gzipped content', (t) => {
   stream.on('finish', () => {
     s3fs.createReadStream('readStream.txt').toArray((arr) => {
       const txt = arr.toString()
-      t.equal(txt, '"Bob is my name"\n',
-        'createReadStream handles gzipped files')
+      t.equal(txt, '"Bob is my name"\n', 'File validates')
+      t.end()
+    })
+  })
+})
+
+test('createReadStream does not gunzip gzipped content when gunzip is off', (t) => {
+  const stream = fs.createReadStream('test/fixtures/upload.txt')
+    .pipe(s3fs.createWriteStream('readStream.txt'))
+
+  stream.on('finish', () => {
+    s3fs.createReadStream('readStream.txt', { gunzip: false })
+    .through(zlib.createGunzip())
+    .toArray((arr) => {
+      const txt = arr.toString()
+      t.equal(txt, '"Bob is my name"\n', 'File validates')
       t.end()
     })
   })
@@ -68,8 +83,7 @@ test('createReadStream reads gzipped content', (t) => {
 test('createReadStream reads non gzipped content', (t) => {
   s3fs.createReadStream('readStreamNotGzipped.txt').toArray((arr) => {
     const txt = arr.toString()
-    t.equal(txt, '"Bob is my name"\n',
-      'createReadStream handles non gzipped files')
+    t.equal(txt, '"Bob is my name"\n', 'File validates')
     t.end()
   })
 })
