@@ -43,7 +43,7 @@ test('createWriteStream aborts when abort is called', (t) => {
   s3fs.createReadStream('uploadAbort.txt').toArray((arr) => {
     const txt = arr.toString()
     parseString(txt, (err, result) => {
-      t.error(err)
+      t.error(err, 'Should be no error')
       t.equal(result.Error.Code[0], 'NoSuchKey',
         'createWriteStream successfully aborts')
       t.end()
@@ -74,7 +74,7 @@ test('createReadStream reads non gzipped content', (t) => {
   })
 })
 
-test('Metadata is accessible via read/write streams', (t) => {
+test('Stat includes expected contents', (t) => {
   const options = {
     Metadata: {
       test: 'this is a test'
@@ -84,9 +84,9 @@ test('Metadata is accessible via read/write streams', (t) => {
     .pipe(s3fs.createWriteStream('metadataTest.txt', options))
   stream.on('finish', () => {
     s3fs.stat('metadataTest.txt', (err, data) => {
-      t.error(err)
-      t.equal(data.Metadata.test, 'this is a test',
-        'Should be able to read metadata object that has been written')
+      t.error(err, 'Should be no error')
+      t.equal(data.Metadata.test, 'this is a test', 'Should be able to read metadata object that has been written')
+      t.equal(data.ContentEncoding, 'gzip', 'Should get the content encoding property')
       t.end()
     })
   })

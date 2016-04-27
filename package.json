@@ -4,7 +4,7 @@
   "description": "An AWS S3-backed filesystem plugin for Koop",
   "main": "index.js",
   "scripts": {
-    "test": "standard src/ && npm run compile && tape test/*.js | tap-spec",
+    "test": "standard src/ && npm run compile && NODE_ENV=test tape test/*.js | tap-spec",
     "compile": "babel src --out-dir ."
   },
   "repository": {
