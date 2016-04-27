@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.1.1] - 2016-04-27
 ### Changed
 * Stat object includes content encoding
 
@@ -15,5 +15,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Type, plugin_name, dependencies, version accessible from class object
 
+[1.1.1]: https://github.com/koopjs/koop-s3fs/compare/v1.1.0..v1.1.1
 [1.1.0]: https://github.com/koopjs/koop-s3fs/compare/v1.0.2..v1.1.0
 [1.0.2]: https://github.com/koopjs/koop-s3fs/compare/v1.0.1..v1.0.2
