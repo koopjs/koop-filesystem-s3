@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.1.3] - 2016-04-28
 ### Changed
 * createReadStream will time out after 30 seconds
 * createReadStream will emit an error if the content is empty
@@ -24,6 +24,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Type, plugin_name, dependencies, version accessible from class object
 
+[1.1.3]: https://github.com/koopjs/koop-s3fs/compare/v1.1.2..v1.1.3
 [1.1.2]: https://github.com/koopjs/koop-s3fs/compare/v1.1.1..v1.1.2
 [1.1.1]: https://github.com/koopjs/koop-s3fs/compare/v1.1.0..v1.1.1
 [1.1.0]: https://github.com/koopjs/koop-s3fs/compare/v1.0.2..v1.1.0
