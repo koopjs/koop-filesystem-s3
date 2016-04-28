@@ -3,7 +3,7 @@ const S3FS = require('s3fs')
 const path = require('path')
 const _ = require('highland')
 const gunzip = require('gunzip-maybe')
-const request = require('request')
+const request = require('request').defaults({timeout: 3000})
 const zlib = require('zlib')
 const Stats = require('s3fs/lib/Stats')
 
@@ -71,9 +71,15 @@ fs.writeFile(filename, data, [options], callback)
     }
     const decompress = (typeof options.gunzip === 'boolean' && !options.gunzip) ? _() : gunzip()
     const url = this.s3.getSignedUrl('getObject', params)
-    let output = _()
+    const output = _()
     request(url)
     .on('error', function (e) { output.emit('error', e) })
+    .on('response', (response) => {
+      if (response.headers['content-length'] < 1) {
+        output.emit('error', new Error('Empty file'))
+        output.destroy()
+      }
+    })
     .pipe(decompress)
     .on('error', function (e) { output.emit('error', e) })
     .pipe(output)

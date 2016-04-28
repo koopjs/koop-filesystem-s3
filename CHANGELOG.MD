@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Changed
+* createReadStream will time out after 30 seconds
+* createReadStream will emit an error if the content is empty
+
 ## [1.1.2] - 2016-04-27
 ### Added
 * Option to disable automatic gunzipping of `createReadStream` content with `{gunzip: false}`
