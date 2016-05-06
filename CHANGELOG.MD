@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* Option to specify content-type on `createWriteStream`
+
 ## [1.1.3] - 2016-04-28
 ### Changed
 * createReadStream will time out after 30 seconds

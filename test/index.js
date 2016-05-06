@@ -90,17 +90,19 @@ test('createReadStream reads non gzipped content', (t) => {
 
 test('Stat includes expected contents', (t) => {
   const options = {
+    ContentType: 'application/json',
     Metadata: {
       test: 'this is a test'
     }
   }
   const stream = fs.createReadStream('test/fixtures/upload.txt')
-    .pipe(s3fs.createWriteStream('metadataTest.txt', options))
+    .pipe(s3fs.createWriteStream('metadataTest.geojson', options))
   stream.on('finish', () => {
-    s3fs.stat('metadataTest.txt', (err, data) => {
+    s3fs.stat('metadataTest.geojson', (err, data) => {
       t.error(err, 'Should be no error')
       t.equal(data.Metadata.test, 'this is a test', 'Should be able to read metadata object that has been written')
       t.equal(data.ContentEncoding, 'gzip', 'Should get the content encoding property')
+      t.equal(data.ContentType, 'application/json', 'Should get the content type property')
       t.end()
     })
   })

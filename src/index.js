@@ -45,13 +45,15 @@ fs.writeFile(filename, data, [options], callback)
     const dir = path.dirname(name)
     const fileName = path.basename(name)
     options = options || {}
-    return {
+    const params = {
       Bucket: path.join(bucket, dir),
       ContentEncoding: 'gzip',
       Key: fileName,
       ACL: 'public-read',
       Metadata: options.Metadata
     }
+    if (options.ContentType) params.ContentType = options.ContentType
+    return params
   }
 
   /**
