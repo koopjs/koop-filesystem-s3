@@ -35,6 +35,25 @@ test('CreateWrite stream should write gzipped content correctly', (t) => {
   })
 })
 
+test('CreateWrite stream should accept data in the end call', (t) => {
+  const output = (s3fs.createWriteStream('readStream2.txt'))
+
+  output.on('finish', () => {
+    request({
+      url: 'https://s3.amazonaws.com/test-koop-downloads/readStream2.txt',
+      gzip: true
+    }, (e, response, body) => {
+      t.error(e, 'No error getting data')
+      t.equal(body, '"Bob is my name"\nfoobarbaz', 'Uploaded and downloaded file should be equal')
+      t.end()
+    })
+  })
+
+  fs.createReadStream('test/fixtures/upload.txt')
+  .on('data', (d) => output.write(d))
+  .on('end', () => output.end('foobarbaz'))
+})
+
 test('createWriteStream aborts when abort is called', (t) => {
   const stream = fs.createReadStream('test/fixtures/upload.txt')
     .pipe(s3fs.createWriteStream('uploadAbort.txt'))
@@ -122,6 +141,9 @@ test.onFinish(() => {
       Objects: [
         {
           Key: 'readStream.txt'
+        },
+        {
+          Key: 'readStream2.txt'
         },
         {
           Key: 'upload.txt'
