@@ -1,5 +1,5 @@
-# koop-s3fs
-[![Build Status](https://travis-ci.org/koopjs/koop-s3fs.svg?branch=master)](https://travis-ci.org/koopjs/koop-s3fs)
+# Koop-FileSystem-S3
+[![Build Status](https://travis-ci.org/koopjs/koop-filesystem-s3.svg?branch=master)](https://travis-ci.org/koopjs/koop-filesystem-s3)
 
 
 Koop integration with Amazon S3
