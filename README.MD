@@ -1,4 +1,6 @@
 # Koop-FileSystem-S3
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/koopjs/koop-filesystem-s3.svg)](https://greenkeeper.io/)
 [![Build Status](https://travis-ci.org/koopjs/koop-filesystem-s3.svg?branch=master)](https://travis-ci.org/koopjs/koop-filesystem-s3)
 
 
