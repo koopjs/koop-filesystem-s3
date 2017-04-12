@@ -99,17 +99,16 @@ fs.writeFile(filename, data, [options], callback)
 
   createWriteStream (name, options) {
     let aborted = false
-    let ended = false
     const input = _()
     const through = _()
     input.on('data', (chunk) => {
       through.write(chunk)
     })
     input.end = (chunk) => {
-      if (chunk) through.write(chunk)
+      if (chunk && !through._nil_pushed) through.write(chunk)
       // destroy automatically calls end
       // since we've alreday called it manually we need to block it
-      if (!ended) through.write(_.nil)
+      through.write(_.nil)
     }
     const params = this.s3Params(this.bucket, name, options)
     params.Body = through.pipe(zlib.createGzip())
@@ -117,8 +116,6 @@ fs.writeFile(filename, data, [options], callback)
     const upload = this.s3.upload(params, (err, data) => {
       if (err && !aborted) input.emit('error', err)
       else if (!err) input.emit('finish')
-      ended = true
-      input.destroy()
     })
 
     input.abort = function () {
@@ -190,6 +187,6 @@ fs.writeFile(filename, data, [options], callback)
 Filesystem.type = 'filesystem'
 Filesystem.plugin_name = 's3fs'
 Filesystem.dependencies = []
-Filesystem.version = require('./package.json').version
+Filesystem.version = require('../package.json').version
 
 module.exports = Filesystem

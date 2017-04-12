@@ -6,7 +6,7 @@ const fs = require('fs')
 const zlib = require('zlib')
 const request = require('request')
 const parseString = require('xml2js').parseString
-const FileSystem = require('../')
+const FileSystem = require('../dist')
 
 const s3fs = new FileSystem()
 
