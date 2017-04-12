@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Better handling on missing files
+* Prevent emitting more than one error from createReadStream
+
 ## [1.2.2] - 2016-10-17
 ### Fixed
 * prevent nil from being written twice on write streams

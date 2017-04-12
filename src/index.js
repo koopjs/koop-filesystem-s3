@@ -3,7 +3,11 @@ const S3FS = require('s3fs')
 const path = require('path')
 const _ = require('highland')
 const gunzip = require('gunzip-maybe')
-const request = require('request').defaults({timeout: 3000})
+let timeout = 3000
+if (config && config.filesystem && config.filesystem.s3) {
+  timeout = config.filesystem.s3.timeout
+}
+const request = require('request').defaults({timeout})
 const zlib = require('zlib')
 const Stats = require('s3fs/lib/Stats')
 
@@ -64,6 +68,7 @@ fs.writeFile(filename, data, [options], callback)
    */
 
   createReadStream (file, options) {
+    let locked
     options = options || {}
     const dir = path.dirname(file)
     const fileName = path.basename(file)
@@ -75,15 +80,26 @@ fs.writeFile(filename, data, [options], callback)
     const url = this.s3.getSignedUrl('getObject', params)
     const output = _()
     request(url)
-    .on('error', function (e) { output.emit('error', e) })
-    .on('response', (response) => {
-      if (response.headers['content-length'] < 1) {
-        output.emit('error', new Error('Empty file'))
-        output.destroy()
+    .on('error', e => {
+      if (!locked) output.emit('error', e)
+      locked = true
+    })
+    .on('response', response => {
+      if (response.statusCode !== 200) {
+        const error = new Error('Unable to retrieve file')
+        error.code = response.statusCode
+        if (!locked) output.emit('error', error)
+        locked = true
+      } else if (response.headers['content-length'] < 1) {
+        if (!locked) output.emit('error', new Error('Empty file'))
+        locked = true
       }
     })
     .pipe(decompress)
-    .on('error', function (e) { output.emit('error', e) })
+    .on('error', e => {
+      if (!locked) output.emit('error', e)
+      locked = true
+    })
     .pipe(output)
 
     return output
@@ -106,9 +122,7 @@ fs.writeFile(filename, data, [options], callback)
     })
     input.end = (chunk) => {
       if (chunk && !through._nil_pushed) through.write(chunk)
-      // destroy automatically calls end
-      // since we've alreday called it manually we need to block it
-      through.write(_.nil)
+      if (!through._nil_pushed) through.write(_.nil)
     }
     const params = this.s3Params(this.bucket, name, options)
     params.Body = through.pipe(zlib.createGzip())

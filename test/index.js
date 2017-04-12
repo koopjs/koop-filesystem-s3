@@ -5,8 +5,8 @@ const config = require('config')
 const fs = require('fs')
 const zlib = require('zlib')
 const request = require('request')
-const parseString = require('xml2js').parseString
 const FileSystem = require('../dist')
+const nock = require('nock')
 
 const s3fs = new FileSystem()
 
@@ -55,19 +55,15 @@ test('CreateWrite stream should accept data in the end call', (t) => {
 })
 
 test('createWriteStream aborts when abort is called', (t) => {
+  t.plan(1)
   const stream = fs.createReadStream('test/fixtures/upload.txt')
     .pipe(s3fs.createWriteStream('uploadAbort.txt'))
 
   setTimeout(stream.abort.bind(stream), 1)
 
-  s3fs.createReadStream('uploadAbort.txt').toArray((arr) => {
-    const txt = arr.toString()
-    parseString(txt, (err, result) => {
-      t.error(err, 'Should be no error')
-      t.equal(result.Error.Code[0], 'NoSuchKey',
-        'createWriteStream successfully aborts')
-      t.end()
-    })
+  request('https://s3.amazonaws.com/test-koop-downloads/test/fixtures/upload.txt', (err, res, body) => {
+    if (err) console.trace(err)
+    t.equal(res.statusCode, 403, 'file is not on s3')
   })
 })
 
@@ -133,7 +129,20 @@ test('Resolve a path to a url', (t) => {
   t.end()
 })
 
+test('Handle socket timeout', t => {
+  t.plan(1)
+  nock('https://test-koop-downloads.s3-external-1.amazonaws.com')
+  .get(/.+/)
+  .socketDelay(2000)
+  .reply(200)
+
+  s3fs.createReadStream('foo.bar')
+  .on('error', e => t.equal(e.message, 'ESOCKETTIMEDOUT'))
+  .on('finish', () => t.fail('finish should not fire'))
+})
+
 test.onFinish(() => {
+  nock.cleanAll()
   const s3fs = new FileSystem()
   const params = {
     Bucket: config.filesystem.s3.bucket,
