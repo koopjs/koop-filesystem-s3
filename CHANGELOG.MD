@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.2.4] - 2017-04-13
 ### Fixed
 * Calling stat with callback no longer exposes unhandled promise rejection
 
@@ -48,6 +48,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Type, plugin_name, dependencies, version accessible from class object
 
+[1.2.4]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.3..v1.2.4
 [1.2.3]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.3..v1.2.2
 [1.2.2]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.1..v1.2.2
 [1.2.1]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.0..v1.2.1
