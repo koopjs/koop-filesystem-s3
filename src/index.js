@@ -149,41 +149,32 @@ fs.writeFile(filename, data, [options], callback)
    */
 
   stat (file, callback) {
-    const promise = new Promise((resolve, reject) => {
-      this.headObject(file, (err, data) => {
+    const options = {
+      Bucket: this.s3Params(this.bucket, file).Bucket,
+      Key: this.s3Params(this.bucket, file).Key
+    }
+
+    if (callback) {
+      this.s3.headObject(options, (err, data) => {
         if (err) {
           err.message = err.name
-          return reject(err)
+          return callback(err)
         }
-        const statObj = new Stats({
-          dev: 0,
-          ino: 0,
-          mode: 0,
-          nlink: 0,
-          uid: 0,
-          gid: 0,
-          rdev: 0,
-          size: Number(data.ContentLength),
-          atim_msec: data.LastModified,
-          mtim_msec: data.LastModified,
-          ctim_msec: data.LastModified,
-          path: path
-        })
-        statObj.acceptRanges = data.AcceptRanges
-        statObj.ETag = data.ETag
-        statObj.ContentType = data.ContentType
-        statObj.ContentEncoding = data.ContentEncoding
-        statObj.Metadata = data.Metadata
-        return resolve(statObj)
+        const statObj = createStatObj(data)
+        callback(null, statObj)
       })
-    })
-    if (!callback) return promise
-
-    promise.then((stats) => {
-      callback(null, stats)
-    }, (reason) => {
-      callback(reason)
-    })
+    } else {
+      return new Promise((resolve, reject) => {
+        this.s3.headObject(options, (err, data) => {
+          if (err) {
+            err.message = err.name
+            return reject(err)
+          }
+          const statObj = createStatObj(data)
+          resolve(statObj)
+        })
+      })
+    }
   }
 
   /**
@@ -198,6 +189,30 @@ fs.writeFile(filename, data, [options], callback)
     return `${endpoint}${this.bucket}/${path}`
   }
 }
+
+function createStatObj (data) {
+  const statObj = new Stats({
+    dev: 0,
+    ino: 0,
+    mode: 0,
+    nlink: 0,
+    uid: 0,
+    gid: 0,
+    rdev: 0,
+    size: Number(data.ContentLength),
+    atim_msec: data.LastModified,
+    mtim_msec: data.LastModified,
+    ctim_msec: data.LastModified,
+    path: path
+  })
+  statObj.acceptRanges = data.AcceptRanges
+  statObj.ETag = data.ETag
+  statObj.ContentType = data.ContentType
+  statObj.ContentEncoding = data.ContentEncoding
+  statObj.Metadata = data.Metadata
+  return statObj
+}
+
 Filesystem.type = 'filesystem'
 Filesystem.plugin_name = 's3fs'
 Filesystem.dependencies = []
