@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Refactor createWriteStream to fix memory leak with Highland
+
 ## [1.2.4] - 2017-04-13
 ### Fixed
 * Calling stat with callback no longer exposes unhandled promise rejection

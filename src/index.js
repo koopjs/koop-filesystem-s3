@@ -7,7 +7,7 @@ let timeout = 3000
 if (config && config.filesystem && config.filesystem.s3) {
   timeout = config.filesystem.s3.timeout
 }
-const request = require('request').defaults({timeout})
+const request = require('request').defaults({ timeout })
 const zlib = require('zlib')
 const Stats = require('s3fs/lib/Stats')
 
@@ -76,31 +76,31 @@ fs.writeFile(filename, data, [options], callback)
       Bucket: path.join(this.bucket, dir),
       Key: fileName
     }
-    const decompress = (typeof options.gunzip === 'boolean' && !options.gunzip) ? _() : gunzip()
+    const decompress = typeof options.gunzip === 'boolean' && !options.gunzip ? _() : gunzip()
     const url = this.s3.getSignedUrl('getObject', params)
     const output = _()
     request(url)
-    .on('error', e => {
-      if (!locked) output.emit('error', e)
-      locked = true
-    })
-    .on('response', response => {
-      if (response.statusCode !== 200) {
-        const error = new Error('Unable to retrieve file')
-        error.code = response.statusCode
-        if (!locked) output.emit('error', error)
+      .on('error', e => {
+        if (!locked) output.emit('error', e)
         locked = true
-      } else if (response.headers['content-length'] < 1) {
-        if (!locked) output.emit('error', new Error('Empty file'))
+      })
+      .on('response', response => {
+        if (response.statusCode !== 200) {
+          const error = new Error('Unable to retrieve file')
+          error.code = response.statusCode
+          if (!locked) output.emit('error', error)
+          locked = true
+        } else if (response.headers['content-length'] < 1) {
+          if (!locked) output.emit('error', new Error('Empty file'))
+          locked = true
+        }
+      })
+      .pipe(decompress)
+      .on('error', e => {
+        if (!locked) output.emit('error', e)
         locked = true
-      }
-    })
-    .pipe(decompress)
-    .on('error', e => {
-      if (!locked) output.emit('error', e)
-      locked = true
-    })
-    .pipe(output)
+      })
+      .pipe(output)
 
     return output
   }
@@ -114,30 +114,34 @@ fs.writeFile(filename, data, [options], callback)
    */
 
   createWriteStream (name, options) {
+    let upload
     let aborted = false
-    const input = _()
-    const through = _()
-    input.on('data', (chunk) => {
-      through.write(chunk)
+
+    const pipeline = _.pipeline(stream => {
+      const params = this.s3Params(this.bucket, name, options)
+      const uploadStream = (params.Body = stream.pipe(zlib.createGzip()))
+
+      upload = this.s3.upload(params, function (err, data) {
+        if (err && !aborted) {
+          pipeline.emit('error', err)
+        } else if (!err) {
+          pipeline.emit('finish')
+        }
+      })
+      return uploadStream
     })
-    input.end = (chunk) => {
-      if (chunk && !through._nil_pushed) through.write(chunk)
-      if (!through._nil_pushed) through.write(_.nil)
+
+    pipeline.end = chunk => {
+      if (chunk && !pipeline._nil_pushed) pipeline.write(chunk)
+      if (!pipeline._nil_pushed) pipeline.write(_.nil)
     }
-    const params = this.s3Params(this.bucket, name, options)
-    params.Body = through.pipe(zlib.createGzip())
 
-    const upload = this.s3.upload(params, (err, data) => {
-      if (err && !aborted) input.emit('error', err)
-      else if (!err) input.emit('finish')
-    })
-
-    input.abort = function () {
+    pipeline.abort = function () {
       aborted = true
       upload.abort()
     }
 
-    return input
+    return pipeline
   }
 
   /**
