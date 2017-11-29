@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.2.5] - 2017-11-29
 ### Fixed
 * Refactor createWriteStream to fix memory leak with Highland
 
@@ -52,6 +52,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Type, plugin_name, dependencies, version accessible from class object
 
+[1.2.5]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.4..v1.2.5
 [1.2.4]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.3..v1.2.4
 [1.2.3]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.3..v1.2.2
 [1.2.2]: https://github.com/koopjs/koop-filesystem-s3/compare/v1.2.1..v1.2.2

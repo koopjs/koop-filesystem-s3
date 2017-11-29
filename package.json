@@ -1,6 +1,6 @@
 {
   "name": "@koopjs/filesystem-s3",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "An AWS S3-backed filesystem plugin for Koop",
   "main": "dist/index.js",
   "scripts": {
