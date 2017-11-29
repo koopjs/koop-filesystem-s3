@@ -31,7 +31,6 @@ test('CreateWrite stream should write gzipped content correctly', t => {
           gzip: true
         },
         (e, response, body) => {
-          console.log('wut')
           t.error(e, 'No error getting data')
           t.equal(body, '"Bob is my name"\n', 'Uploaded and downloaded file should be equal')
         }
