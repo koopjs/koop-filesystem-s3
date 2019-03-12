@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/koopjs/koop-filesystem-s3#readme",
   "devDependencies": {
-    "buble": "^0.19.0",
+    "buble": "^0.19.7",
     "nock": "^10.0.0",
     "standard": "^11.0.0",
     "tap-spec": "^5.0.0",
