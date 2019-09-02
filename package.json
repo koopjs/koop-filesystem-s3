@@ -24,7 +24,7 @@
     "standard": "^11.0.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.5.1",
-    "xml2js": "^0.4.16"
+    "xml2js": "^0.4.21"
   },
   "dependencies": {
     "config": "^2.0.0",
